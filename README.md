@@ -35,7 +35,7 @@ Requirements:
 Add the GitHub repository as a Codex marketplace, then install the plugin:
 
 ~~~sh
-codex plugin marketplace add DannyMac180/sol-advisor --ref main
+codex plugin marketplace add kirisame-ame/sol-advisor --ref main
 codex plugin add sol-advisor@sol-advisor
 ~~~
 
