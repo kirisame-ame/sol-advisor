@@ -1,13 +1,13 @@
 {
   "name": "sol-advisor",
   "version": "0.2.0",
-  "description": "Codex-native architect workflow that routes through separately installed, role-pinned Luna and Terra custom agents and requires a fresh read-only Sol review.",
+  "description": "Sol Advisor Fork",
   "author": {
-    "name": "Daniel McAteer",
-    "url": "https://github.com/DannyMac180"
+    "name": "Kirisame-ame",
+    "url": "https://github.com/kirisame-ame"
   },
   "homepage": "https://github.com/DannyMac180/sol-advisor#readme",
-  "repository": "https://github.com/DannyMac180/sol-advisor",
+  "repository": "https://github.com/kirisame-ame/sol-advisor",
   "license": "MIT",
   "keywords": [
     "codex",
