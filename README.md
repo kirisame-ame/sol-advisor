@@ -14,10 +14,10 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 | Lane | Native agent type | Pinned profile | Use it for |
 |---|---|---|---|
-| Orchestrator | Primary session | GPT-5.6 Sol / High | Requirements, architecture, decomposition, routing, and acceptance |
+| Orchestrator | Primary session | GPT-5.6 Sol / Low | Requirements, architecture, decomposition, routing, and acceptance |
 | Routine implementation | sol_advisor_luna_implementer | GPT-5.6 Luna / Max | Mechanical, repeatable, fully specified work |
-| Harder implementation | sol_advisor_terra_implementer | GPT-5.6 Terra / Max | Context-heavy, higher-risk, or wider-blast-radius work |
-| Final review | sol_advisor_sol_reviewer | GPT-5.6 Sol / High / requests read-only | Fresh review of the actual diff and verification evidence |
+| Harder implementation | sol_advisor_terra_implementer | GPT-5.6 Terra / Medium | Context-heavy, higher-risk, or wider-blast-radius work |
+| Final review | sol_advisor_sol_reviewer | GPT-5.6 Sol / Low / requests read-only | Fresh review of the actual diff and verification evidence |
 
 The final review is context-independent, not model-family-independent: Sol reviews
 Sol's orchestration with a fresh context. That catches conversational assumptions, but
