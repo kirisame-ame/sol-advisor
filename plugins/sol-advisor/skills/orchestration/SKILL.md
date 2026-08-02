@@ -1,6 +1,6 @@
 ---
 name: orchestration
-description: "Codex-native architect and delegation workflow that uses separately installed, role-pinned custom agents: GPT-5.6 Luna at max reasoning for routine implementation, GPT-5.6 Terra at max reasoning for harder implementation, and a fresh GPT-5.6 Sol reviewer at high reasoning with a requested read-only profile. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, lane selection, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context Sol review before completion."
+description: "Codex-native architect and delegation workflow that uses separately installed, role-pinned custom agents: GPT-5.6 Luna at max reasoning for routine implementation, GPT-5.6 Terra at medium reasoning for harder implementation, and a fresh GPT-5.6 Sol reviewer at low reasoning with a requested read-only profile. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, lane selection, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context Sol review before completion."
 ---
 
 # Sol Advisor Orchestration
@@ -17,11 +17,9 @@ review packet.
 
 ## Confirm the primary session
 
-Run the primary Codex session on gpt-5.6-sol with high reasoning. Verify the current
+Run the primary Codex session on gpt-5.6-sol with low reasoning. Verify the current
 model and effort when the runtime exposes them. If either setting differs, tell the
-user how to select Sol / High and stop before delegation. If the runtime does not
-expose the settings, ask the user to confirm that Sol / High is selected and stop
-until they confirm. A skill cannot change the primary session's model itself; never
+user as a warning only.  A skill cannot change the primary session's model itself; never
 assume or claim that this prerequisite is satisfied.
 
 ## Preflight the companion custom agents
@@ -146,7 +144,7 @@ agent_type: sol_advisor_terra_implementer
 fork_turns: none
 ~~~
 
-Its installed agent file pins GPT-5.6 Terra at max reasoning. Do not include a
+Its installed agent file pins GPT-5.6 Terra at medium reasoning. Do not include a
 per-spawn model or reasoning field. Confirm the public-details-first runtime evidence,
 using the local inspector only when those details omit model or effort, before
 accepting any work; if it is unavailable or differs, stop the lane rather than falling
@@ -187,7 +185,7 @@ fork_turns: none
 ~~~
 
 Use the commitment-boundary prompt from the role contracts. The installed agent file
-pins Sol at high reasoning and requests a read-only sandbox; do not add a per-spawn
+pins Sol at low reasoning and requests a read-only sandbox; do not add a per-spawn
 model or reasoning field. Observe the actual host sandbox and permission profile using
 the same public-details-first procedure. Keep the consult bounded; the primary session
 still makes the decision. If the mandatory preflight or runtime observation fails, stop
