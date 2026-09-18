@@ -69,7 +69,7 @@ esac
 
 [ "$target_dir" != "/" ] || fail "refusing to use the filesystem root as an agent target directory."
 
-agent_files='sol-advisor-luna-implementer.toml sol-advisor-terra-implementer.toml sol-advisor-sol-reviewer.toml'
+agent_files='sol-advisor-luna-implementer.toml sol-advisor-sol-reviewer.toml sol-advisor-astra-reviewer.toml'
 
 # Validate all shipped sources before looking at or mutating the destination.
 for agent_file in $agent_files; do

@@ -13,7 +13,7 @@ fail() {
 }
 
 hash_agents() {
-  shasum -a 256 "$1/sol-advisor-luna-implementer.toml" "$1/sol-advisor-terra-implementer.toml" "$1/sol-advisor-sol-reviewer.toml" | shasum -a 256 | awk '{print $1}'
+  shasum -a 256 "$1/sol-advisor-luna-implementer.toml" "$1/sol-advisor-sol-reviewer.toml" "$1/sol-advisor-astra-reviewer.toml" | shasum -a 256 | awk '{print $1}'
 }
 
 script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd) || exit 1
@@ -78,15 +78,16 @@ expected = {
         "model": "gpt-5.6-luna",
         "model_reasoning_effort": "max",
     },
-    "sol-advisor-terra-implementer.toml": {
-        "name": "sol_advisor_terra_implementer",
-        "model": "gpt-5.6-terra",
-        "model_reasoning_effort": "max",
-    },
     "sol-advisor-sol-reviewer.toml": {
         "name": "sol_advisor_sol_reviewer",
         "model": "gpt-5.6-sol",
-        "model_reasoning_effort": "high",
+        "model_reasoning_effort": "medium",
+        "sandbox_mode": "read-only",
+    },
+    "sol-advisor-astra-reviewer.toml": {
+        "name": "sol_advisor_astra_reviewer",
+        "model": "gpt-6-astra",
+        "model_reasoning_effort": "low",
         "sandbox_mode": "read-only",
     },
 }
@@ -110,7 +111,7 @@ pass "custom-agent TOML validity and exact role pins"
 
 clean_target=$tmp_dir/clean-install
 sh "$installer" --target-dir "$clean_target"
-for agent_file in sol-advisor-luna-implementer.toml sol-advisor-terra-implementer.toml sol-advisor-sol-reviewer.toml; do
+for agent_file in sol-advisor-luna-implementer.toml sol-advisor-sol-reviewer.toml sol-advisor-astra-reviewer.toml; do
   cmp -s "$templates/$agent_file" "$clean_target/$agent_file" || fail "clean install is not byte-for-byte exact: $agent_file"
 done
 pass "installer clean install and byte-for-byte final copies"
@@ -124,7 +125,7 @@ pass "installer --check refuses missing files without mutation"
 
 codex_home_target=$tmp_dir/codex-home
 CODEX_HOME="$codex_home_target" sh "$installer"
-for agent_file in sol-advisor-luna-implementer.toml sol-advisor-terra-implementer.toml sol-advisor-sol-reviewer.toml; do
+for agent_file in sol-advisor-luna-implementer.toml sol-advisor-sol-reviewer.toml sol-advisor-astra-reviewer.toml; do
   cmp -s "$templates/$agent_file" "$codex_home_target/agents/$agent_file" || fail "CODEX_HOME target is not byte-for-byte exact: $agent_file"
 done
 test ! -e "$codex_home_target/config.toml" || fail "installer unexpectedly created config.toml"
@@ -136,7 +137,7 @@ mkdir "$relative_parent"
   cd "$relative_parent"
   sh "$installer" --target-dir explicit-agents
 )
-for agent_file in sol-advisor-luna-implementer.toml sol-advisor-terra-implementer.toml sol-advisor-sol-reviewer.toml; do
+for agent_file in sol-advisor-luna-implementer.toml sol-advisor-sol-reviewer.toml sol-advisor-astra-reviewer.toml; do
   cmp -s "$templates/$agent_file" "$relative_parent/explicit-agents/$agent_file" || fail "explicit relative target is not byte-for-byte exact: $agent_file"
 done
 pass "installer accepts an explicit relative target directory"
@@ -159,8 +160,8 @@ printf '%s\n' 'intentionally conflicting custom-agent template' > "$conflict_tar
 if sh "$installer" --target-dir "$conflict_target"; then
   fail "installer accepted a differing destination file"
 fi
-test ! -e "$conflict_target/sol-advisor-terra-implementer.toml" || fail "conflict refusal partially installed the Terra template"
 test ! -e "$conflict_target/sol-advisor-sol-reviewer.toml" || fail "conflict refusal partially installed the Sol template"
+test ! -e "$conflict_target/sol-advisor-astra-reviewer.toml" || fail "conflict refusal partially installed the Astra template"
 pass "installer conflict refusal without partial mutation"
 
 runtime_sessions=$tmp_dir/runtime-sessions
@@ -231,19 +232,27 @@ pass "runtime inspector multiple-match refusal"
 
 for document in "$skill" "$contracts"; do
   grep -Fq 'agent_type: sol_advisor_luna_implementer' "$document" || fail "missing Luna custom agent reference: $document"
-  grep -Fq 'agent_type: sol_advisor_terra_implementer' "$document" || fail "missing Terra custom agent reference: $document"
   grep -Fq 'agent_type: sol_advisor_sol_reviewer' "$document" || fail "missing Sol custom agent reference: $document"
+  grep -Fq 'agent_type: sol_advisor_astra_reviewer' "$document" || fail "missing Astra custom agent reference: $document"
   grep -Fq 'fork_turns: none' "$document" || fail "missing fresh-context spawn requirement: $document"
   if grep -Eq '^[[:space:]]*(model|reasoning_effort):' "$document"; then
     fail "per-spawn model or reasoning override remains in: $document"
   fi
 done
-grep -Fq '../../scripts/install-agents.sh' "$skill" || fail "skill does not resolve the companion installer relative to SKILL.md"
-grep -Fq '../../scripts/inspect-agent-runtime.sh' "$skill" || fail "skill does not resolve the runtime inspector relative to SKILL.md"
+grep -Fq '../../scripts/install-agents.ps1' "$skill" || fail "skill does not resolve the PowerShell companion installer relative to SKILL.md"
+grep -Fq '../../scripts/inspect-agent-runtime.ps1' "$skill" || fail "skill does not resolve the PowerShell runtime inspector relative to SKILL.md"
 grep -Fqi 'public native spawn/details metadata first' "$skill" || fail "skill does not require public runtime metadata first"
 grep -Fqi 'host broadens it' "$skill" || fail "skill does not describe broadened reviewer sandbox behavior"
 grep -Fqi 'parent captures and verifies exact before-and-after repository' "$contracts" || fail "role contracts do not require behavioral-read-only state verification"
 grep -Fqi 'never silently fall back' "$skill" || fail "skill does not state the no-fallback guarantee"
+grep -Fq 'gpt-5.6-sol with medium reasoning' "$skill" || fail "skill does not allow the Sol-medium orchestrator profile"
+grep -Fq 'gpt-6-astra with low reasoning' "$skill" || fail "skill does not allow the Astra-light orchestrator profile"
+grep -Fq 'The accepted value for either implementation lane is Luna / max' "$skill" || fail "skill does not require Luna-max implementation lanes"
+grep -Fq 'Sol / medium' "$skill" || fail "skill does not require a Sol-medium reviewer"
+grep -Fq 'Astra /' "$skill" || fail "skill does not require an Astra-low reviewer"
+if grep -Eqi 'Sol / high|pins Sol at low|pins GPT-5\.6 Sol at high' "$skill" "$contracts"; then
+  fail "stale non-Luna implementation or reviewer model pin remains in the orchestration docs"
+fi
 pass "custom-agent contract references, runtime fallback, and no per-spawn overrides"
 
 sh -n "$installer"

@@ -10,19 +10,23 @@ do not remove a required field.
 Before every spawn, complete steps 1–2 of the preflight in SKILL.md; complete steps
 3–4 after spawn and before accepting the lane's result:
 
-1. Resolve ../../scripts/install-agents.sh relative to SKILL.md and require its
+1. Resolve ../../scripts/install-agents.ps1 relative to SKILL.md and require its
    non-mutating --check to confirm all installed role files exactly match the shipped
    templates.
-2. Require the native spawn tool to expose all three named custom agent types.
+2. Require the native spawn tool to expose all three named custom agent types:
+   sol_advisor_luna_implementer, sol_advisor_sol_reviewer, and
+   sol_advisor_astra_reviewer. For Astra-light review spawns, use
+   `agent_type: sol_advisor_astra_reviewer`.
 3. After spawn, inspect public native spawn/details metadata first. If it omits model
    or effort and the local rollout is accessible, resolve
-   ../../scripts/inspect-agent-runtime.sh relative to SKILL.md and run it with the
+   ../../scripts/inspect-agent-runtime.ps1 relative to SKILL.md and run it with the
    native subagent thread id. Its allowlisted JSON is the authoritative local fallback
    for omitted model and effort. Public and local values must agree when both exist.
 4. Require exact role, model, and reasoning-effort observation before accepting the
-   selected lane. Always inspect and report the Sol reviewer's observed sandbox policy
-   type and permission profile type; the shipped TOML requests read-only but a host may
-   broaden it.
+   selected lane. Implementation lanes must be GPT-5.6 Luna at max. The reviewer must
+   match the primary profile: GPT-5.6 Sol at medium or GPT-6 Astra at low. Always
+   inspect and report the reviewer's observed sandbox policy type and permission profile
+   type; the shipped TOML requests read-only but a host may broaden it.
 
 A missing, stale, conflicting, unavailable, inconsistent, or unobservable
 role/model/effort stops the affected lane. Report the actionable installer, local
@@ -32,7 +36,7 @@ pins the role's model and effort, so omit all per-spawn model and reasoning over
 
 ## Shared implementation contract
 
-Every Luna or Terra prompt must contain all five sections below. Give each worker a
+Every implementation prompt must contain all five sections below. Give each worker a
 non-overlapping file set or bounded responsibility. Independent, non-overlapping work
 may run in parallel; shared files and dependency chains must run serially.
 
@@ -76,7 +80,7 @@ GAPS: <unfinished work, ambiguity, or none>
 The primary session must inspect the actual diff and rerun verification. The report is
 not evidence by itself.
 
-## Luna — routine implementer
+## Luna — implementation worker
 
 Spawn a native custom subagent thread with exactly:
 
@@ -90,12 +94,14 @@ Do not attach a per-spawn model or reasoning field. Require public-details-first
 runtime observation of that role and pin, using the local inspector only if public
 details omit model or effort, before accepting its report.
 
-Prompt:
+Use this one role for routine and context-heavy implementation alike. The prompt must
+encode the settled architecture and the five-part contract below. Prompt:
 
 ~~~text
 ROLE
-Act as the routine implementation worker. Execute the supplied specification exactly;
-surface ambiguity instead of redesigning the architecture.
+Act as the implementation worker. Execute the supplied specification exactly, including
+the difficult details within the settled architecture; surface ambiguity instead of
+redesigning the architecture.
 
 <paste and complete the Shared implementation contract>
 ~~~
@@ -104,51 +110,23 @@ If the exact template preflight, native type exposure, or runtime pin observatio
 fails, stop and report the limitation. Never silently fall back to another model or
 reasoning level.
 
-## Terra — complex implementer
-
-Spawn a native custom subagent thread with exactly:
-
-~~~text
-agent_type: sol_advisor_terra_implementer
-fork_turns: none
-~~~
-
-The installed sol_advisor_terra_implementer file pins GPT-5.6 Terra at max reasoning.
-Do not attach a per-spawn model or reasoning field. Require public-details-first
-runtime observation of that role and pin, using the local inspector only if public
-details omit model or effort, before accepting its report.
-
-Prompt:
-
-~~~text
-ROLE
-Act as the complex implementation worker. Resolve the difficult implementation details
-within the settled architecture, document material judgment calls, and preserve every
-stated interface and constraint.
-
-<paste and complete the Shared implementation contract>
-~~~
-
-If the exact template preflight, native type exposure, or runtime pin observation
-fails, stop and report the limitation. Never silently fall back to another model or
-reasoning level.
-
-## Fresh Sol — requested-read-only final reviewer
+## Profile-matched — requested-read-only final reviewer
 
 Spawn a new native custom review thread after implementation and primary-session
-verification, with exactly:
+verification, using the role that matches the primary orchestrator:
 
 ~~~text
 agent_type: sol_advisor_sol_reviewer
 fork_turns: none
 ~~~
 
-The installed sol_advisor_sol_reviewer file pins GPT-5.6 Sol at high reasoning and
-requests a read-only sandbox. Do not attach a per-spawn model or reasoning field.
-Require public-details-first observation of the Sol/high pin, using the local inspector
-only if public details omit model or effort. Also capture the observed sandbox policy
-type and permission profile type; the requested profile does not prove host-enforced
-read-only isolation.
+For a Sol-medium primary, use `sol_advisor_sol_reviewer`; for an Astra-light primary,
+use `sol_advisor_astra_reviewer`. The Sol reviewer pins GPT-5.6 Sol at medium reasoning
+and the Astra reviewer pins GPT-6 Astra at low reasoning. Both request a read-only
+sandbox. Do not attach a per-spawn model or reasoning field. Require public-details-first
+observation of the matching profile, using the local inspector only if public details
+omit model or effort. Also capture the observed sandbox policy type and permission
+profile type; the requested profile does not prove host-enforced read-only isolation.
 
 Prompt:
 
@@ -190,7 +168,7 @@ set and verification evidence.
 
 If the exact template preflight, native type exposure, or required role/model/effort
 observation fails, stop and report the limitation. Never silently fall back to another
-model or reasoning level. Sol reviewing Sol is context-clean, but it is not
+model or reasoning level. A profile-matched review is context-clean, but it is not
 cross-model-family independence.
 
 Apply the observed sandbox policy, not the requested TOML value, to review acceptance:
@@ -203,18 +181,19 @@ Apply the observed sandbox policy, not the requested TOML value, to review accep
 - If hard isolation is required, the sandbox cannot be observed, or any mutation
   occurs, stop the lane. Do not claim enforced read-only isolation.
 
-## Commitment-boundary Sol consult
+## Commitment-boundary profile-matched reviewer consult
 
-For a pre-implementation consult, use a fresh native custom review thread with a
-requested read-only profile, exactly:
+For a pre-implementation consult, use a fresh native custom review thread with the
+requested read-only profile matching the primary orchestrator:
 
 ~~~text
 agent_type: sol_advisor_sol_reviewer
 fork_turns: none
 ~~~
 
-Give it the proposed decision, stated goal, constraints, relevant paths, alternatives,
-and the one question whose answer changes the plan. Require proceed, change, or stop,
-followed by the decisive reason and largest risk. Apply the same exact-template,
-native-exposure, public-details-first runtime-observation, sandbox-reporting, and
-no-fallback rules as final review.
+For Astra-light, use `sol_advisor_astra_reviewer` instead. Give it the proposed
+decision, stated goal, constraints, relevant paths, alternatives, and the one question
+whose answer changes the plan. Require proceed, change, or stop, followed by the
+decisive reason and largest risk. Apply the same exact-template, native-exposure,
+public-details-first runtime-observation, sandbox-reporting, and no-fallback rules as
+final review.
