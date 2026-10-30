@@ -40,8 +40,8 @@ $skillPath = Join-Path $pluginDir 'skills\orchestration\SKILL.md'
 $contractsPath = Join-Path $pluginDir 'skills\orchestration\references\role-contracts.md'
 $templateDir = Join-Path $pluginDir 'agents'
 $agentFiles = @(
-    @{ File = 'sol-advisor-luna-implementer.toml'; Name = 'sol_advisor_luna_implementer'; Model = 'gpt-5.6-luna'; Effort = 'max'; Sandbox = $null },
-    @{ File = 'sol-advisor-sol-reviewer.toml'; Name = 'sol_advisor_sol_reviewer'; Model = 'gpt-5.6-sol'; Effort = 'medium'; Sandbox = 'read-only' },
+    @{ File = 'sol-advisor-luna-implementer.toml'; Name = 'sol_advisor_luna_implementer'; Model = 'gpt-6-luna'; Effort = 'max'; Sandbox = $null },
+    @{ File = 'sol-advisor-sol-reviewer.toml'; Name = 'sol_advisor_sol_reviewer'; Model = 'gpt-6-sol'; Effort = 'medium'; Sandbox = 'read-only' },
     @{ File = 'sol-advisor-astra-reviewer.toml'; Name = 'sol_advisor_astra_reviewer'; Model = 'gpt-6-astra'; Effort = 'low'; Sandbox = 'read-only' }
 )
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('sol-advisor-verify-' + [guid]::NewGuid().ToString('N'))
@@ -107,14 +107,14 @@ try {
         (@{ type = 'response_item'; payload = @{ prompt = 'DO_NOT_LEAK_PROMPT'; token = 'DO_NOT_LEAK_TOKEN' } } | ConvertTo-Json -Compress),
         (@{ type = 'event_msg'; payload = @{ environment = @{ SECRET_ENV = 'DO_NOT_LEAK_ENV' }; config = @{ api_key = 'DO_NOT_LEAK_CONFIG' } } } | ConvertTo-Json -Compress),
         (@{ type = 'session_meta'; payload = @{ id = $successId; parent_thread_id = '00000000-0000-7000-8000-000000000000'; agent_role = 'sol_advisor_luna_implementer'; agent_path = '/root/fixture'; model_provider = 'openai'; cwd = '/fixture/cwd'; base_instructions = 'DO_NOT_LEAK_INSTRUCTIONS' } } | ConvertTo-Json -Compress),
-        (@{ type = 'turn_context'; payload = @{ model = 'gpt-5.6-luna'; effort = 'max'; sandbox_policy = @{ type = 'danger-full-access'; hidden = 'DO_NOT_LEAK_SANDBOX' }; permission_profile = @{ type = 'disabled'; hidden = 'DO_NOT_LEAK_PERMISSION' }; cwd = '/fixture/cwd'; summary = 'DO_NOT_LEAK_SUMMARY' } } | ConvertTo-Json -Compress)
+        (@{ type = 'turn_context'; payload = @{ model = 'gpt-6-luna'; effort = 'max'; sandbox_policy = @{ type = 'danger-full-access'; hidden = 'DO_NOT_LEAK_SANDBOX' }; permission_profile = @{ type = 'disabled'; hidden = 'DO_NOT_LEAK_PERMISSION' }; cwd = '/fixture/cwd'; summary = 'DO_NOT_LEAK_SUMMARY' } } | ConvertTo-Json -Compress)
     )
     [System.IO.File]::WriteAllLines($rollout, $records)
     $runtimeOutput = (& $runtimeInspector -ThreadId $successId -SessionsDir $runtimeSessions | Out-String).Trim()
     if (-not $?) { Fail 'PowerShell runtime inspector failed on a valid fixture' }
     if ($runtimeOutput -match 'DO_NOT_LEAK') { Fail 'runtime inspector leaked fixture content' }
     $runtimeResult = $runtimeOutput | ConvertFrom-Json
-    if ($runtimeResult.agent_role -ne 'sol_advisor_luna_implementer' -or $runtimeResult.model -ne 'gpt-5.6-luna' -or $runtimeResult.effort -ne 'max') {
+    if ($runtimeResult.agent_role -ne 'sol_advisor_luna_implementer' -or $runtimeResult.model -ne 'gpt-6-luna' -or $runtimeResult.effort -ne 'max') {
         Fail 'runtime inspector returned unexpected routing metadata'
     }
     Pass 'runtime inspector safe allowlisted extraction'

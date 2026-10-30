@@ -1,6 +1,6 @@
 {
   "name": "sol-advisor",
-  "version": "0.2.0+codex.20260918095214",
+  "version": "0.2.0+codex.20261026070647",
   "description": "Sol Advisor Fork",
   "author": {
     "name": "Kirisame-ame",
@@ -13,7 +13,8 @@
     "codex",
     "orchestration",
     "multi-agent",
-    "gpt-5.6",
+    "gpt-6-sol",
+    "gpt-6-luna",
     "gpt-6-astra",
     "luna"
   ],
@@ -21,7 +22,7 @@
   "interface": {
     "displayName": "Sol Advisor",
     "shortDescription": "Orchestrate with Sol-medium or Astra-light, delegate implementation to Luna-max, and review with a matching profile.",
-    "longDescription": "Sol Advisor gives Codex a capability-routed delivery workflow: the primary session is verified as either GPT-5.6 Sol at medium reasoning or GPT-6 Astra at low reasoning, all implementation work uses one GPT-5.6 Luna lane at max reasoning, and the read-only reviewer uses the matching Sol-medium or Astra-low profile.",
+    "longDescription": "Sol Advisor gives Codex a capability-routed delivery workflow: the primary session is verified as either GPT-6 Sol at medium reasoning or GPT-6 Astra at low reasoning, all implementation work uses one GPT-6 Luna lane at max reasoning, and the read-only reviewer uses the matching Sol-medium or Astra-low profile.",
     "developerName": "Daniel McAteer",
     "category": "Productivity",
     "capabilities": [

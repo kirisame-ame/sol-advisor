@@ -13,9 +13,9 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 | Lane | Native agent type | Pinned profile | Use it for |
 |---|---|---|---|
-| Orchestrator | Primary session | GPT-5.6 Sol / Medium **or** GPT-6 Astra / Low | Requirements, architecture, decomposition, routing, and acceptance |
-| Implementation | sol_advisor_luna_implementer | GPT-5.6 Luna / Max | Every delegated implementation task |
-| Sol review | sol_advisor_sol_reviewer | GPT-5.6 Sol / Medium / read-only | Fresh review when the orchestrator is Sol |
+| Orchestrator | Primary session | GPT-6 Sol / Medium **or** GPT-6 Astra / Low | Requirements, architecture, decomposition, routing, and acceptance |
+| Implementation | sol_advisor_luna_implementer | GPT-6 Luna / Max | Every delegated implementation task |
+| Sol review | sol_advisor_sol_reviewer | GPT-6 Sol / Medium / read-only | Fresh review when the orchestrator is Sol |
 | Astra review | sol_advisor_astra_reviewer | GPT-6 Astra / Low / read-only | Fresh review when the orchestrator is Astra |
 
 Only the Luna implementation lane is shipped. The reviewer should match the
@@ -28,7 +28,7 @@ Requirements:
 
 - A current Codex CLI or ChatGPT desktop app with plugins, native subagents, and
   custom agents enabled.
-- Access to GPT-5.6 Sol, GPT-6 Astra, and GPT-5.6 Luna at the required reasoning
+- Access to GPT-6 Sol, GPT-6 Astra, and GPT-6 Luna at the required reasoning
   levels.
 - Windows PowerShell 5.1 or PowerShell 7.
 
@@ -66,7 +66,7 @@ missing template and then verifies every installed copy byte-for-byte.
 Start a **new Codex task** after the check passes. Native agent types are discovered at
 task creation, so an existing task may not see the installed roles.
 
-Then select either GPT-5.6 Sol with Medium reasoning or GPT-6 Astra with Low reasoning
+Then select either GPT-6 Sol with Medium reasoning or GPT-6 Astra with Low reasoning
 for the primary session, and ask for implementation work normally, or invoke the
 orchestration skill explicitly:
 

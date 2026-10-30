@@ -75,12 +75,12 @@ templates = Path(sys.argv[1])
 expected = {
     "sol-advisor-luna-implementer.toml": {
         "name": "sol_advisor_luna_implementer",
-        "model": "gpt-5.6-luna",
+        "model": "gpt-6-luna",
         "model_reasoning_effort": "max",
     },
     "sol-advisor-sol-reviewer.toml": {
         "name": "sol_advisor_sol_reviewer",
-        "model": "gpt-5.6-sol",
+        "model": "gpt-6-sol",
         "model_reasoning_effort": "medium",
         "sandbox_mode": "read-only",
     },
@@ -173,7 +173,7 @@ printf '%s\n' \
   '{"type":"response_item","payload":{"prompt":"DO_NOT_LEAK_PROMPT","token":"DO_NOT_LEAK_TOKEN"}}' \
   '{"type":"event_msg","payload":{"environment":{"SECRET_ENV":"DO_NOT_LEAK_ENV"},"config":{"api_key":"DO_NOT_LEAK_CONFIG"}}}' \
   "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_success_id\",\"parent_thread_id\":\"00000000-0000-7000-8000-000000000000\",\"agent_role\":\"sol_advisor_luna_implementer\",\"agent_path\":\"/root/fixture\",\"model_provider\":\"openai\",\"cwd\":\"/fixture/cwd\",\"base_instructions\":\"DO_NOT_LEAK_INSTRUCTIONS\"}}" \
-  '{"type":"turn_context","payload":{"model":"gpt-5.6-luna","effort":"max","sandbox_policy":{"type":"danger-full-access","hidden":"DO_NOT_LEAK_SANDBOX"},"permission_profile":{"type":"disabled","hidden":"DO_NOT_LEAK_PERMISSION"},"cwd":"/fixture/cwd","summary":"DO_NOT_LEAK_SUMMARY"}}' \
+  '{"type":"turn_context","payload":{"model":"gpt-6-luna","effort":"max","sandbox_policy":{"type":"danger-full-access","hidden":"DO_NOT_LEAK_SANDBOX"},"permission_profile":{"type":"disabled","hidden":"DO_NOT_LEAK_PERMISSION"},"cwd":"/fixture/cwd","summary":"DO_NOT_LEAK_SUMMARY"}}' \
   > "$runtime_success_rollout"
 runtime_output=$(sh "$runtime_inspector" --sessions-dir "$runtime_sessions" "$runtime_success_id")
 if ! printf '%s\n' "$runtime_output" | jq -e --arg id "$runtime_success_id" '
@@ -181,7 +181,7 @@ if ! printf '%s\n' "$runtime_output" | jq -e --arg id "$runtime_success_id" '
   and (keys | sort) == ["agent_path", "agent_role", "cwd", "effort", "model", "model_provider", "parent_thread_id", "permission_profile_type", "sandbox_policy_type", "thread_id"]
   and .thread_id == $id
   and .agent_role == "sol_advisor_luna_implementer"
-  and .model == "gpt-5.6-luna"
+  and .model == "gpt-6-luna"
   and .effort == "max"
   and .sandbox_policy_type == "danger-full-access"
   and .permission_profile_type == "disabled"
@@ -207,13 +207,13 @@ pass "runtime inspector zero-match refusal"
 runtime_missing_turn_id=33333333-3333-7333-8333-333333333333
 printf '%s\n' "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_missing_turn_id\",\"agent_role\":\"sol_advisor_luna_implementer\"}}" > "$runtime_day/rollout-2026-08-01T00-00-01-$runtime_missing_turn_id.jsonl"
 runtime_missing_session_id=44444444-4444-7444-8444-444444444444
-printf '%s\n' '{"type":"turn_context","payload":{"model":"gpt-5.6-luna","effort":"max"}}' > "$runtime_day/rollout-2026-08-01T00-00-02-$runtime_missing_session_id.jsonl"
+printf '%s\n' '{"type":"turn_context","payload":{"model":"gpt-6-luna","effort":"max"}}' > "$runtime_day/rollout-2026-08-01T00-00-02-$runtime_missing_session_id.jsonl"
 runtime_missing_role_id=55555555-5555-7555-8555-555555555555
-printf '%s\n' "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_missing_role_id\"}}" '{"type":"turn_context","payload":{"model":"gpt-5.6-luna","effort":"max"}}' > "$runtime_day/rollout-2026-08-01T00-00-03-$runtime_missing_role_id.jsonl"
+printf '%s\n' "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_missing_role_id\"}}" '{"type":"turn_context","payload":{"model":"gpt-6-luna","effort":"max"}}' > "$runtime_day/rollout-2026-08-01T00-00-03-$runtime_missing_role_id.jsonl"
 runtime_missing_model_id=66666666-6666-7666-8666-666666666666
 printf '%s\n' "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_missing_model_id\",\"agent_role\":\"sol_advisor_luna_implementer\"}}" '{"type":"turn_context","payload":{"effort":"max"}}' > "$runtime_day/rollout-2026-08-01T00-00-04-$runtime_missing_model_id.jsonl"
 runtime_missing_effort_id=77777777-7777-7777-8777-777777777777
-printf '%s\n' "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_missing_effort_id\",\"agent_role\":\"sol_advisor_luna_implementer\"}}" '{"type":"turn_context","payload":{"model":"gpt-5.6-luna"}}' > "$runtime_day/rollout-2026-08-01T00-00-05-$runtime_missing_effort_id.jsonl"
+printf '%s\n' "{\"type\":\"session_meta\",\"payload\":{\"id\":\"$runtime_missing_effort_id\",\"agent_role\":\"sol_advisor_luna_implementer\"}}" '{"type":"turn_context","payload":{"model":"gpt-6-luna"}}' > "$runtime_day/rollout-2026-08-01T00-00-05-$runtime_missing_effort_id.jsonl"
 for rejected_runtime_id in "$runtime_missing_turn_id" "$runtime_missing_session_id" "$runtime_missing_role_id" "$runtime_missing_model_id" "$runtime_missing_effort_id"; do
   if sh "$runtime_inspector" --sessions-dir "$runtime_sessions" "$rejected_runtime_id" >/dev/null 2>&1; then
     fail "runtime inspector accepted missing required routing metadata"
@@ -245,7 +245,7 @@ grep -Fqi 'public native spawn/details metadata first' "$skill" || fail "skill d
 grep -Fqi 'host broadens it' "$skill" || fail "skill does not describe broadened reviewer sandbox behavior"
 grep -Fqi 'parent captures and verifies exact before-and-after repository' "$contracts" || fail "role contracts do not require behavioral-read-only state verification"
 grep -Fqi 'never silently fall back' "$skill" || fail "skill does not state the no-fallback guarantee"
-grep -Fq 'gpt-5.6-sol with medium reasoning' "$skill" || fail "skill does not allow the Sol-medium orchestrator profile"
+grep -Fq 'gpt-6-sol with medium reasoning' "$skill" || fail "skill does not allow the Sol-medium orchestrator profile"
 grep -Fq 'gpt-6-astra with low reasoning' "$skill" || fail "skill does not allow the Astra-light orchestrator profile"
 grep -Fq 'The accepted value for either implementation lane is Luna / max' "$skill" || fail "skill does not require Luna-max implementation lanes"
 grep -Fq 'Sol / medium' "$skill" || fail "skill does not require a Sol-medium reviewer"

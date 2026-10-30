@@ -23,8 +23,8 @@ Before every spawn, complete steps 1–2 of the preflight in SKILL.md; complete 
    native subagent thread id. Its allowlisted JSON is the authoritative local fallback
    for omitted model and effort. Public and local values must agree when both exist.
 4. Require exact role, model, and reasoning-effort observation before accepting the
-   selected lane. Implementation lanes must be GPT-5.6 Luna at max. The reviewer must
-   match the primary profile: GPT-5.6 Sol at medium or GPT-6 Astra at low. Always
+   selected lane. Implementation lanes must be GPT-6 Luna at max. The reviewer must
+   match the primary profile: GPT-6 Sol at medium or GPT-6 Astra at low. Always
    inspect and report the reviewer's observed sandbox policy type and permission profile
    type; the shipped TOML requests read-only but a host may broaden it.
 
@@ -89,7 +89,7 @@ agent_type: sol_advisor_luna_implementer
 fork_turns: none
 ~~~
 
-The installed sol_advisor_luna_implementer file pins GPT-5.6 Luna at max reasoning.
+The installed sol_advisor_luna_implementer file pins GPT-6 Luna at max reasoning.
 Do not attach a per-spawn model or reasoning field. Require public-details-first
 runtime observation of that role and pin, using the local inspector only if public
 details omit model or effort, before accepting its report.
@@ -121,7 +121,7 @@ fork_turns: none
 ~~~
 
 For a Sol-medium primary, use `sol_advisor_sol_reviewer`; for an Astra-light primary,
-use `sol_advisor_astra_reviewer`. The Sol reviewer pins GPT-5.6 Sol at medium reasoning
+use `sol_advisor_astra_reviewer`. The Sol reviewer pins GPT-6 Sol at medium reasoning
 and the Astra reviewer pins GPT-6 Astra at low reasoning. Both request a read-only
 sandbox. Do not attach a per-spawn model or reasoning field. Require public-details-first
 observation of the matching profile, using the local inspector only if public details

@@ -1,6 +1,6 @@
 ---
 name: orchestration
-description: "Codex-native architect and delegation workflow where the primary session is GPT-5.6 Sol at medium reasoning or GPT-6 Astra at low reasoning, implementation is handled only by GPT-5.6 Luna at max reasoning, and the read-only reviewer matches the Sol-medium or Astra-low profile. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, lane selection, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context review before completion."
+description: "Codex-native architect and delegation workflow where the primary session is GPT-6 Sol at medium reasoning or GPT-6 Astra at low reasoning, implementation is handled only by GPT-6 Luna at max reasoning, and the read-only reviewer matches the Sol-medium or Astra-low profile. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, lane selection, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context review before completion."
 ---
 
 # Sol Advisor Orchestration
@@ -20,7 +20,7 @@ review packet.
 
 Run the primary Codex session on one of these allowed orchestrator profiles:
 
-- gpt-5.6-sol with medium reasoning (Sol-medium)
+- gpt-6-sol with medium reasoning (Sol-medium)
 - gpt-6-astra with low reasoning (Astra-light)
 
 Verify the current model and effort when the runtime exposes them. If either setting
@@ -33,7 +33,7 @@ is satisfied.
 The three role files are user-owned native custom-agent TOML files. Installing or
 updating this plugin does **not** install, overwrite, or register them automatically.
 They must be installed separately and a fresh Codex task must be started so the native
-spawn tool can discover the current roles. The implementation role pins GPT-5.6 Luna at
+spawn tool can discover the current roles. The implementation role pins GPT-6 Luna at
 max; the two reviewer roles pin Sol-medium and Astra-low respectively.
 
 Before every delegation, complete steps 1–2. After spawning a lane, complete steps
@@ -131,7 +131,7 @@ agent_type: sol_advisor_luna_implementer
 fork_turns: none
 ~~~
 
-Its installed agent file pins GPT-5.6 Luna at max reasoning. Do not include a
+Its installed agent file pins GPT-6 Luna at max reasoning. Do not include a
 per-spawn model or reasoning field. Confirm the public-details-first runtime evidence,
 using the local inspector only when those details omit model or effort, before
 accepting any work; if it is unavailable or differs, stop the lane rather than falling
