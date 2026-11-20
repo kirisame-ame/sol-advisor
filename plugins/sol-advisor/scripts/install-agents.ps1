@@ -29,8 +29,7 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $templateDir = [System.IO.Path]::GetFullPath((Join-Path $scriptDir '..\agents'))
 $agentFiles = @(
     'sol-advisor-luna-implementer.toml',
-    'sol-advisor-sol-reviewer.toml',
-    'sol-advisor-astra-reviewer.toml'
+    'sol-advisor-sol-reviewer.toml'
 )
 
 if ([string]::IsNullOrWhiteSpace($TargetDir)) {

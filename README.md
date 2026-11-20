@@ -1,7 +1,7 @@
 # Sol Advisor
 
-**Sol or Astra runs orchestration, Luna handles every implementation task, and a
-matching read-only Sol or Astra review stands between the diff and done.**
+**GPT-6.2 Sol orchestrates and reviews, while GPT-6 Luna handles every implementation
+task at max reasoning in Fast mode.**
 
 Sol Advisor is a Codex-native architect workflow for capability-routed software
 delivery. The primary session stays focused on requirements, architecture, specs, and
@@ -13,14 +13,16 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 
 | Lane | Native agent type | Pinned profile | Use it for |
 |---|---|---|---|
-| Orchestrator | Primary session | GPT-6 Sol / Medium **or** GPT-6 Astra / Low | Requirements, architecture, decomposition, routing, and acceptance |
-| Implementation | sol_advisor_luna_implementer | GPT-6 Luna / Max | Every delegated implementation task |
-| Sol review | sol_advisor_sol_reviewer | GPT-6 Sol / Medium / read-only | Fresh review when the orchestrator is Sol |
-| Astra review | sol_advisor_astra_reviewer | GPT-6 Astra / Low / read-only | Fresh review when the orchestrator is Astra |
+| Orchestrator | Primary session | GPT-6.2 Sol / reasoning chosen for this run | Requirements, architecture, decomposition, routing, and acceptance |
+| Implementation | sol_advisor_luna_implementer | GPT-6 Luna / Max / Fast | Every delegated implementation task |
+| Review | sol_advisor_sol_reviewer | GPT-6.2 Sol / reasoning chosen for this run / read-only | Fresh review before reporting done |
 
-Only the Luna implementation lane is shipped. The reviewer should match the
-orchestrator family: Sol-medium reviews a Sol-medium orchestration, and Astra-low
-reviews an Astra-low orchestration.
+The orchestration skill asks at the start of each run which reasoning effort to use for
+the orchestrator and reviewer. The user can choose one level for both or specify them
+separately. Luna remains pinned to max reasoning. Codex custom agents inherit the parent
+session's speed, so select Fast in the composer before implementation; this also puts
+the orchestrator and reviewer on Fast. Custom-agent TOML files cannot set an independent
+speed for Luna.
 
 ## Install from GitHub
 
@@ -28,8 +30,8 @@ Requirements:
 
 - A current Codex CLI or ChatGPT desktop app with plugins, native subagents, and
   custom agents enabled.
-- Access to GPT-6 Sol, GPT-6 Astra, and GPT-6 Luna at the required reasoning
-  levels.
+- Access to GPT-6.2 Sol and GPT-6 Luna at the required reasoning levels.
+- Fast speed available for the parent Codex session.
 - Windows PowerShell 5.1 or PowerShell 7.
 
 Add the GitHub repository as a Codex marketplace, then install the plugin:
@@ -66,9 +68,9 @@ missing template and then verifies every installed copy byte-for-byte.
 Start a **new Codex task** after the check passes. Native agent types are discovered at
 task creation, so an existing task may not see the installed roles.
 
-Then select either GPT-6 Sol with Medium reasoning or GPT-6 Astra with Low reasoning
-for the primary session, and ask for implementation work normally, or invoke the
-orchestration skill explicitly:
+Then select GPT-6.2 Sol for the primary session. Before implementation, select Fast
+speed in the composer so Luna inherits it. Invoke the orchestration skill, which will
+ask for the reasoning level to use:
 
 ~~~text
 Use $sol-advisor:orchestration to build this feature, verify it, and obtain the final matching review before reporting done.
@@ -138,26 +140,26 @@ exist, they must agree.
 
 ## How routing works
 
-The Sol or Astra orchestrator writes a five-part spec for every implementation:
+The GPT-6.2 Sol orchestrator writes a five-part spec for every implementation:
 objective, file ownership, interfaces, constraints, and verification. Luna is the only
 implementation producer, so every implementation task uses the same pinned lane.
 
 Before delegation and acceptance, the skill requires all of the following:
 
 1. The installed role files pass the byte-for-byte companion check.
-2. The native spawn tool exposes all three exact names in the table above.
+2. The native spawn tool exposes both exact names in the table above.
 3. Public native spawn/details metadata identifies the selected role and, when exposed,
-   its expected model and effort. If model or effort is omitted, the exact-rollout local
-   inspector above must provide them instead.
+   its expected model and selected effort. If model or effort is omitted, the exact-rollout
+   local inspector above must provide them instead.
 4. The reviewer’s observed sandbox policy type and permission profile type are captured
    and reported.
 
 A missing, stale, conflicting, unavailable, inconsistent, or unobservable
 role/model/effort stops the affected lane with an actionable error. There is no silent
-model, reasoning, or agent-type fallback, and per-spawn calls do not override the role
-pins.
+model, reasoning, or agent-type fallback. The reviewer receives the user's selected
+reasoning effort in its spawn request; the model itself remains pinned in its TOML.
 
-Both reviewer TOMLs request read-only sandboxing, but the host permission profile may
+The reviewer TOML requests read-only sandboxing, but the host permission profile may
 broaden that request. If the observed sandbox policy type is read-only, review can
 proceed with enforced isolation. If the host broadens it, review can proceed only as
 behaviorally read-only when hard isolation is not required, the prompt forbids edits,

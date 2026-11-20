@@ -13,10 +13,8 @@ Before every spawn, complete steps 1–2 of the preflight in SKILL.md; complete 
 1. Resolve ../../scripts/install-agents.ps1 relative to SKILL.md and require its
    non-mutating --check to confirm all installed role files exactly match the shipped
    templates.
-2. Require the native spawn tool to expose all three named custom agent types:
-   sol_advisor_luna_implementer, sol_advisor_sol_reviewer, and
-   sol_advisor_astra_reviewer. For Astra-light review spawns, use
-   `agent_type: sol_advisor_astra_reviewer`.
+2. Require the native spawn tool to expose both named custom agent types:
+   sol_advisor_luna_implementer and sol_advisor_sol_reviewer.
 3. After spawn, inspect public native spawn/details metadata first. If it omits model
    or effort and the local rollout is accessible, resolve
    ../../scripts/inspect-agent-runtime.ps1 relative to SKILL.md and run it with the
@@ -24,15 +22,17 @@ Before every spawn, complete steps 1–2 of the preflight in SKILL.md; complete 
    for omitted model and effort. Public and local values must agree when both exist.
 4. Require exact role, model, and reasoning-effort observation before accepting the
    selected lane. Implementation lanes must be GPT-6 Luna at max. The reviewer must
-   match the primary profile: GPT-6 Sol at medium or GPT-6 Astra at low. Always
-   inspect and report the reviewer's observed sandbox policy type and permission profile
-   type; the shipped TOML requests read-only but a host may broaden it.
+   use GPT-6.2 Sol at the reasoning level the user selected for this run. Always inspect
+   and report the reviewer's observed sandbox policy type and permission profile type;
+   the shipped TOML requests read-only but a host may broaden it.
 
 A missing, stale, conflicting, unavailable, inconsistent, or unobservable
 role/model/effort stops the affected lane. Report the actionable installer, local
 runtime-inspection, or fresh-task step; never silently fall back to a built-in role,
-another model, another effort, or a differently named agent. The custom-agent TOML
-pins the role's model and effort, so omit all per-spawn model and reasoning overrides.
+another model, another effort, or a differently named agent. The custom-agent TOMLs
+pin the role's model, and Luna's TOML also pins its effort. Omit per-spawn model
+overrides. Pass the user's selected reasoning effort to Sol reviewer spawns; omit it
+for Luna so its max pin applies.
 
 ## Shared implementation contract
 
@@ -90,9 +90,10 @@ fork_turns: none
 ~~~
 
 The installed sol_advisor_luna_implementer file pins GPT-6 Luna at max reasoning.
-Do not attach a per-spawn model or reasoning field. Require public-details-first
-runtime observation of that role and pin, using the local inspector only if public
-details omit model or effort, before accepting its report.
+Use Fast mode inherited from the parent session; Codex custom-agent files cannot set a
+separate service tier. Do not attach a per-spawn model or reasoning field. Require
+public-details-first runtime observation of that role and pin, using the local inspector
+only if public details omit model or effort, before accepting its report.
 
 Use this one role for routine and context-heavy implementation alike. The prompt must
 encode the settled architecture and the five-part contract below. Prompt:
@@ -110,7 +111,7 @@ If the exact template preflight, native type exposure, or runtime pin observatio
 fails, stop and report the limitation. Never silently fall back to another model or
 reasoning level.
 
-## Profile-matched — requested-read-only final reviewer
+## User-configured — requested-read-only final reviewer
 
 Spawn a new native custom review thread after implementation and primary-session
 verification, using the role that matches the primary orchestrator:
@@ -118,15 +119,15 @@ verification, using the role that matches the primary orchestrator:
 ~~~text
 agent_type: sol_advisor_sol_reviewer
 fork_turns: none
+reasoning_effort: <user-selected-reviewer-effort>
 ~~~
 
-For a Sol-medium primary, use `sol_advisor_sol_reviewer`; for an Astra-light primary,
-use `sol_advisor_astra_reviewer`. The Sol reviewer pins GPT-6 Sol at medium reasoning
-and the Astra reviewer pins GPT-6 Astra at low reasoning. Both request a read-only
-sandbox. Do not attach a per-spawn model or reasoning field. Require public-details-first
-observation of the matching profile, using the local inspector only if public details
-omit model or effort. Also capture the observed sandbox policy type and permission
-profile type; the requested profile does not prove host-enforced read-only isolation.
+The Sol reviewer pins GPT-6.2 Sol and leaves reasoning effort open. Pass the user's
+selected reviewer effort in the spawn request. It requests a read-only sandbox. Do not
+attach a per-spawn model override. Require public-details-first observation of the
+selected model and effort, using the local inspector only if public details omit model
+or effort. Also capture the observed sandbox policy type and permission profile type;
+the requested profile does not prove host-enforced read-only isolation.
 
 Prompt:
 
@@ -191,9 +192,9 @@ agent_type: sol_advisor_sol_reviewer
 fork_turns: none
 ~~~
 
-For Astra-light, use `sol_advisor_astra_reviewer` instead. Give it the proposed
-decision, stated goal, constraints, relevant paths, alternatives, and the one question
-whose answer changes the plan. Require proceed, change, or stop, followed by the
-decisive reason and largest risk. Apply the same exact-template, native-exposure,
-public-details-first runtime-observation, sandbox-reporting, and no-fallback rules as
-final review.
+Pass `reasoning_effort: <user-selected-reviewer-effort>` when spawning the Sol reviewer.
+Give it the proposed decision, stated goal, constraints, relevant paths, alternatives,
+and the one question whose answer changes the plan. Require proceed, change, or stop,
+followed by the decisive reason and largest risk. Apply the same exact-template,
+native-exposure, public-details-first runtime-observation, sandbox-reporting, and
+no-fallback rules as final review.

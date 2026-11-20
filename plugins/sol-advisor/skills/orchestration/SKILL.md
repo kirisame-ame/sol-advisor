@@ -1,6 +1,6 @@
 ---
 name: orchestration
-description: "Codex-native architect and delegation workflow where the primary session is GPT-6 Sol at medium reasoning or GPT-6 Astra at low reasoning, implementation is handled only by GPT-6 Luna at max reasoning, and the read-only reviewer matches the Sol-medium or Astra-low profile. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, lane selection, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context review before completion."
+description: "Codex-native architect and delegation workflow using GPT-6.2 Sol for orchestration and review at a user-selected reasoning level, and GPT-6 Luna at max reasoning for implementation. Require Fast service tier for the parent session so Luna inherits Fast mode. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context review before completion."
 ---
 
 # Sol Advisor Orchestration
@@ -16,25 +16,30 @@ Read [references/role-contracts.md](references/role-contracts.md) before the fir
 delegation in a session. It defines the required implementation spec, reports, and
 review packet.
 
-## Confirm the primary session
+## Select the primary model and reasoning level
 
-Run the primary Codex session on one of these allowed orchestrator profiles:
+At the start of every skill run, before planning or delegation, ask the user:
 
-- gpt-6-sol with medium reasoning (Sol-medium)
-- gpt-6-astra with low reasoning (Astra-light)
+> What reasoning level should I use for the GPT-6.2 Sol orchestrator and reviewer?
+> Choose one level for both, or give separate levels. Use a level available in the
+> current session: low, medium, high, xhigh, max, or ultra when available.
 
-Verify the current model and effort when the runtime exposes them. If either setting
-differs from both allowed profiles, tell the user as a warning only. A skill cannot
-change the primary session's model itself; never assume or claim that this prerequisite
-is satisfied.
+Do not assume a default or begin delegated work until the user answers. Run the primary
+Codex session on GPT-6.2 Sol. Verify its current model and effort when the runtime
+exposes them. If the active effort differs from the user's selected orchestrator level,
+ask the user to select that level in the composer and wait before continuing; the skill
+cannot change the primary session's model or effort itself. Pass the selected reviewer
+effort explicitly when spawning the Sol reviewer. If the runtime omits the primary model
+or effort, ask the user to confirm the current composer selection; never infer it.
 
 ## Preflight the companion custom agents
 
-The three role files are user-owned native custom-agent TOML files. Installing or
+The two role files are user-owned native custom-agent TOML files. Installing or
 updating this plugin does **not** install, overwrite, or register them automatically.
 They must be installed separately and a fresh Codex task must be started so the native
 spawn tool can discover the current roles. The implementation role pins GPT-6 Luna at
-max; the two reviewer roles pin Sol-medium and Astra-low respectively.
+max. The reviewer role pins GPT-6.2 Sol but leaves its reasoning effort open for the
+user's per-run selection.
 
 Before every delegation, complete steps 1–2. After spawning a lane, complete steps
 3–4 before accepting any result:
@@ -55,20 +60,19 @@ Before every delegation, complete steps 1–2. After spawning a lane, complete s
    install-agents.ps1 installs only missing files and intentionally refuses to replace
    a differing file. Do not work around the error by choosing another agent.
 
-2. Inspect the native spawn tool's available agent_type entries. All three names must
+2. Inspect the native spawn tool's available agent_type entries. Both names must
    be exposed exactly before any lane may run:
 
    - sol_advisor_luna_implementer
    - sol_advisor_sol_reviewer
-   - sol_advisor_astra_reviewer
-
    If a name is missing or unavailable, stop the affected lane and tell the user to
    install/check the companion files, start a fresh task, and update Codex if the name
    is still not exposed. Never substitute a built-in role or a similarly named agent.
 
 3. Treat byte-exact templates plus observed runtime routing as an acceptance gate. Use
    public native spawn/details metadata first. It must identify the selected custom
-   role; when it also exposes model and effort, compare them with the pinned lane.
+   role; compare any exposed model and effort with the required model and the user's
+   selected effort for that lane.
 
    If public details omit model or effort and the local rollout is accessible, resolve
    ../../scripts/inspect-agent-runtime.ps1 relative to this SKILL.md and run it against
@@ -85,12 +89,11 @@ Before every delegation, complete steps 1–2. After spawning a lane, complete s
    omitted model and effort, not a replacement agent or an inferred guess. If both
    public details and the helper expose a value, they must agree.
 
-   The accepted value for implementation is Luna / max. The reviewer must
-   match the primary profile: Sol / medium when the primary is Sol-medium, or Astra /
-   low when the primary is Astra-light. If the selected role, model, or effort is
-   missing, inconsistent, unavailable, or unobservable after this procedure, stop that
-   lane with an actionable error and do not accept its report as routed work. Never
-   silently fall back to another model, effort, or agent type.
+   The accepted implementation value is GPT-6 Luna / max. The reviewer must use
+   GPT-6.2 Sol and the user-selected reviewer effort. If the selected role, model, or
+   effort is missing, inconsistent, unavailable, or unobservable after this procedure,
+   stop that lane with an actionable error and do not accept its report as routed work.
+   Never silently fall back to another model, effort, or agent type.
 
 4. Always inspect and report the reviewer's observed sandbox policy type and permission
    profile type from public details, or from the local helper when public details omit
@@ -98,8 +101,17 @@ Before every delegation, complete steps 1–2. After spawning a lane, complete s
    profile can broaden that request. Do not call the review OS-enforced read-only unless
    the observed sandbox policy type is read-only.
 
-The custom-agent file, not the spawn call, pins each model and reasoning effort. Do
-not add a per-spawn model or reasoning override anywhere in this workflow.
+The custom-agent files pin their models, and the Luna file pins max reasoning. Do not
+add a per-spawn model override. Pass the user's selected reasoning effort when spawning
+the Sol reviewer; omit the reasoning field for Luna so its max pin applies.
+
+## Require Fast mode for implementation
+
+Before spawning Luna, require the parent Codex session to use Fast speed. Codex custom
+agents inherit the root session's service tier, and a custom-agent TOML cannot set a
+separate tier. If Fast is not active or cannot be observed, ask the user to select Fast
+in the composer and wait for confirmation before spawning Luna. This also puts the
+orchestrator and reviewer on Fast because they share the parent session's speed.
 
 ## Keep architect work in the primary session
 
@@ -169,48 +181,38 @@ Do not call a task complete because a worker says it is complete.
 
 Before committing to a consequential architecture, migration, public API, or wide
 refactor, spawn a fresh custom review thread with a requested read-only profile that
-matches the primary orchestrator:
+uses the selected reviewer reasoning level:
 
 ~~~text
 agent_type: sol_advisor_sol_reviewer
 fork_turns: none
-~~~
-
-For an Astra-light primary, use:
-
-~~~text
-agent_type: sol_advisor_astra_reviewer
-fork_turns: none
+reasoning_effort: <user-selected-reviewer-effort>
 ~~~
 
 Use the commitment-boundary prompt from the role contracts. The installed agent file
-pins Sol-medium or Astra-low and requests a read-only sandbox; do not add a per-spawn
-model or reasoning field. Observe the actual host sandbox and permission profile using
-the same public-details-first procedure. Keep the consult bounded; the primary session
-still makes the decision. If the mandatory preflight or runtime observation fails, stop
-the consult instead of using a different reviewer.
+pins GPT-6.2 Sol and requests a read-only sandbox; pass the selected reviewer reasoning
+effort in the spawn call, but do not add a per-spawn model override. Observe the actual
+host sandbox and permission profile using the same public-details-first procedure. Keep
+the consult bounded; the primary session still makes the decision. If the mandatory
+preflight or runtime observation fails, stop the consult instead of using a different
+reviewer.
 
 ## Require the final profile-matched review
 
 After implementation and primary verification, always spawn a new, fresh native
-custom review thread with the role matching the primary orchestrator:
+custom review thread using the user's selected reviewer reasoning effort:
 
 ~~~text
 agent_type: sol_advisor_sol_reviewer
 fork_turns: none
-~~~
-
-For an Astra-light primary, use:
-
-~~~text
-agent_type: sol_advisor_astra_reviewer
-fork_turns: none
+reasoning_effort: <user-selected-reviewer-effort>
 ~~~
 
 Give it the final-review packet from the role-contract reference. The reviewer is
-role-pinned by its installed file to Sol-medium or Astra-low and requests read-only
-isolation. Instruct it to remain behaviorally read-only, inspect the actual files and
-diff, then return exactly one verdict: ship, fix-first, or rethink.
+model-pinned by its installed file to GPT-6.2 Sol, uses the selected reviewer reasoning
+effort, and requests read-only isolation. Instruct it to remain behaviorally read-only,
+inspect the actual files and diff, then return exactly one verdict: ship, fix-first, or
+rethink.
 
 - ship: report completion with verification evidence.
 - fix-first: delegate the named fixes, independently verify them, then obtain a new

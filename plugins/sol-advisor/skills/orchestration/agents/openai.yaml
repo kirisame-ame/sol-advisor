@@ -1,4 +1,4 @@
 interface:
   display_name: "Sol Advisor Orchestration"
-  short_description: "Use Sol-medium or Astra-light to orchestrate a single Luna-max implementation lane"
-  default_prompt: "Use $orchestration to verify a Sol-medium or Astra-light primary session, route all implementation to Luna-max, select the matching read-only reviewer, and verify the evidence."
+  short_description: "Use GPT-6.2 Sol, ask for reasoning level, and delegate Fast-mode implementation to Luna-max"
+  default_prompt: "Use $orchestration with GPT-6.2 Sol. Ask me which reasoning level to use for the orchestrator and reviewer, require Fast speed for the parent session so Luna inherits Fast mode, delegate implementation to Luna-max, and obtain the final read-only Sol review."

@@ -41,8 +41,7 @@ $contractsPath = Join-Path $pluginDir 'skills\orchestration\references\role-cont
 $templateDir = Join-Path $pluginDir 'agents'
 $agentFiles = @(
     @{ File = 'sol-advisor-luna-implementer.toml'; Name = 'sol_advisor_luna_implementer'; Model = 'gpt-6-luna'; Effort = 'max'; Sandbox = $null },
-    @{ File = 'sol-advisor-sol-reviewer.toml'; Name = 'sol_advisor_sol_reviewer'; Model = 'gpt-6-sol'; Effort = 'medium'; Sandbox = 'read-only' },
-    @{ File = 'sol-advisor-astra-reviewer.toml'; Name = 'sol_advisor_astra_reviewer'; Model = 'gpt-6-astra'; Effort = 'low'; Sandbox = 'read-only' }
+    @{ File = 'sol-advisor-sol-reviewer.toml'; Name = 'sol_advisor_sol_reviewer'; Model = 'gpt-6.2-sol'; Effort = $null; Sandbox = 'read-only' }
 )
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('sol-advisor-verify-' + [guid]::NewGuid().ToString('N'))
 
@@ -74,7 +73,9 @@ try {
         }
         if ((Get-TomlValue $text 'name') -ne $agent.Name) { Fail "$path has an unexpected role name" }
         if ((Get-TomlValue $text 'model') -ne $agent.Model) { Fail "$path has an unexpected model pin" }
-        if ((Get-TomlValue $text 'model_reasoning_effort') -ne $agent.Effort) { Fail "$path has an unexpected reasoning pin" }
+        $actualEffort = Get-TomlValue $text 'model_reasoning_effort'
+        if ($null -ne $agent.Effort -and $actualEffort -ne $agent.Effort) { Fail "$path has an unexpected reasoning pin" }
+        if ($null -eq $agent.Effort -and $null -ne $actualEffort) { Fail "$path must leave reasoning effort open" }
         if ($null -eq $agent.Sandbox) {
             if ($null -ne (Get-TomlValue $text 'sandbox_mode')) { Fail "$path unexpectedly requests a sandbox mode" }
         } elseif ((Get-TomlValue $text 'sandbox_mode') -ne $agent.Sandbox) {
@@ -122,12 +123,14 @@ try {
     $skillText = Get-Content -LiteralPath $skillPath -Raw
     $contractsText = Get-Content -LiteralPath $contractsPath -Raw
     foreach ($document in @($skillText, $contractsText)) {
-        foreach ($requiredText in @('sol_advisor_luna_implementer', 'sol_advisor_sol_reviewer', 'sol_advisor_astra_reviewer', 'fork_turns: none', 'install-agents.ps1', 'inspect-agent-runtime.ps1')) {
+        foreach ($requiredText in @('sol_advisor_luna_implementer', 'sol_advisor_sol_reviewer', 'fork_turns: none', 'reasoning_effort: <user-selected-reviewer-effort>', 'install-agents.ps1', 'inspect-agent-runtime.ps1')) {
             if ($document -notlike "*$requiredText*") { Fail "documentation is missing required text: $requiredText" }
         }
         if ($document -match '(?i)\.sh') { Fail 'documentation still references POSIX scripts' }
-        if ($document -match '(?m)^\s*(model|reasoning_effort):') { Fail 'documentation contains a per-spawn model or reasoning override' }
+        if ($document -match '(?m)^\s*model:') { Fail 'documentation contains a per-spawn model override' }
     }
+    if ($skillText -notmatch 'reasoning level should I use') { Fail 'skill does not ask the user to choose reasoning effort' }
+    if ($skillText -notmatch 'parent Codex session to use Fast speed') { Fail 'skill does not require inherited Fast mode for Luna' }
     Pass 'PowerShell script references, role contracts, and removed-profile checks'
     Write-Output "VERIFY PASSED: Sol Advisor PowerShell checks completed in $tempRoot"
 } finally {
