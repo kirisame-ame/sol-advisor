@@ -14,4 +14,7 @@ evidence-backed findings. Use fix-first only for bounded required corrections an
 rethink when the architecture or scope must change. Do not silently substitute a
 different role, model, or reasoning level; the skill supplies the user's selected
 reasoning level when it spawns this review lane.
+
+Use Standard speed inherited from the parent session. Custom agents inherit the root
+session's speed, so this role cannot select Standard independently.
 """

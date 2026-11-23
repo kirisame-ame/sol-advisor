@@ -130,7 +130,9 @@ try {
         if ($document -match '(?m)^\s*model:') { Fail 'documentation contains a per-spawn model override' }
     }
     if ($skillText -notmatch 'reasoning level should I use') { Fail 'skill does not ask the user to choose reasoning effort' }
-    if ($skillText -notmatch 'parent Codex session to use Fast speed') { Fail 'skill does not require inherited Fast mode for Luna' }
+    if ($skillText -notmatch 'At skill startup, ensure Standard is') { Fail 'skill does not require Standard speed at startup' }
+    if ($skillText -notmatch 'Keep Standard speed throughout') { Fail 'skill does not keep Standard speed for every lane' }
+    if ($skillText -match 'select Fast') { Fail 'skill still requests Fast speed' }
     Pass 'PowerShell script references, role contracts, and removed-profile checks'
     Write-Output "VERIFY PASSED: Sol Advisor PowerShell checks completed in $tempRoot"
 } finally {

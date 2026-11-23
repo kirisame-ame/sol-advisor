@@ -241,7 +241,9 @@ grep -Fqi 'host broadens it' "$skill" || fail "skill does not describe broadened
 grep -Fqi 'parent captures and verifies exact before-and-after repository' "$contracts" || fail "role contracts do not require behavioral-read-only state verification"
 grep -Fqi 'never silently fall back' "$skill" || fail "skill does not state the no-fallback guarantee"
 grep -Fq 'GPT-6.2 Sol orchestrator and reviewer' "$skill" || fail "skill does not require GPT-6.2 Sol"
-grep -Fq 'parent Codex session to use Fast speed' "$skill" || fail "skill does not require inherited Fast mode for Luna"
+grep -Fq 'At skill startup, ensure Standard is' "$skill" || fail "skill does not require Standard during orchestration"
+grep -Fq 'Keep Standard speed throughout' "$skill" || fail "skill does not keep Standard speed for every lane"
+if grep -Eqi 'select Fast' "$skill"; then fail "skill still requests Fast speed"; fi
 grep -Fq 'The accepted implementation value is GPT-6 Luna / max' "$skill" || fail "skill does not require Luna-max implementation lanes"
 grep -Fq 'user-selected reviewer effort' "$contracts" || fail "role contracts do not preserve the user-selected reviewer effort"
 if grep -Eqi 'gpt-6-sol|gpt-6-astra|Astra-light|astra_reviewer|Sol-medium|Astra-low' "$skill" "$contracts"; then

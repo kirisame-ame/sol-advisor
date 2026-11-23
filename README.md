@@ -1,7 +1,7 @@
 # Sol Advisor
 
 **GPT-6.2 Sol orchestrates and reviews, while GPT-6 Luna handles every implementation
-task at max reasoning in Fast mode.**
+task at max reasoning. All three lanes use Standard speed.**
 
 Sol Advisor is a Codex-native architect workflow for capability-routed software
 delivery. The primary session stays focused on requirements, architecture, specs, and
@@ -14,15 +14,14 @@ I write [**Attention Heads**](https://attentionheads.substack.com/?utm_source=gi
 | Lane | Native agent type | Pinned profile | Use it for |
 |---|---|---|---|
 | Orchestrator | Primary session | GPT-6.2 Sol / reasoning chosen for this run | Requirements, architecture, decomposition, routing, and acceptance |
-| Implementation | sol_advisor_luna_implementer | GPT-6 Luna / Max / Fast | Every delegated implementation task |
+| Implementation | sol_advisor_luna_implementer | GPT-6 Luna / Max / Standard | Every delegated implementation task |
 | Review | sol_advisor_sol_reviewer | GPT-6.2 Sol / reasoning chosen for this run / read-only | Fresh review before reporting done |
 
 The orchestration skill asks at the start of each run which reasoning effort to use for
 the orchestrator and reviewer. The user can choose one level for both or specify them
-separately. Luna remains pinned to max reasoning. Codex custom agents inherit the parent
-session's speed, so select Fast in the composer before implementation; this also puts
-the orchestrator and reviewer on Fast. Custom-agent TOML files cannot set an independent
-speed for Luna.
+separately. Luna remains pinned to max reasoning. Keep the parent session at Standard
+speed for orchestration, implementation, and review. Codex custom agents inherit the
+parent session's speed, and their TOML files cannot set a per-agent speed.
 
 ## Install from GitHub
 
@@ -31,7 +30,7 @@ Requirements:
 - A current Codex CLI or ChatGPT desktop app with plugins, native subagents, and
   custom agents enabled.
 - Access to GPT-6.2 Sol and GPT-6 Luna at the required reasoning levels.
-- Fast speed available for the parent Codex session.
+- Standard speed selected in the parent Codex session.
 - Windows PowerShell 5.1 or PowerShell 7.
 
 Add the GitHub repository as a Codex marketplace, then install the plugin:
@@ -68,9 +67,9 @@ missing template and then verifies every installed copy byte-for-byte.
 Start a **new Codex task** after the check passes. Native agent types are discovered at
 task creation, so an existing task may not see the installed roles.
 
-Then select GPT-6.2 Sol for the primary session. Before implementation, select Fast
-speed in the composer so Luna inherits it. Invoke the orchestration skill, which will
-ask for the reasoning level to use:
+Then select GPT-6.2 Sol and Standard speed for the primary session. Keep Standard
+selected throughout the workflow. Invoke the orchestration skill, which will ask for the
+reasoning level to use:
 
 ~~~text
 Use $sol-advisor:orchestration to build this feature, verify it, and obtain the final matching review before reporting done.

@@ -1,6 +1,6 @@
 ---
 name: orchestration
-description: "Codex-native architect and delegation workflow using GPT-6.2 Sol for orchestration and review at a user-selected reasoning level, and GPT-6 Luna at max reasoning for implementation. Require Fast service tier for the parent session so Luna inherits Fast mode. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context review before completion."
+description: "Codex-native architect and delegation workflow using GPT-6.2 Sol for orchestration and review at a user-selected reasoning level, and GPT-6 Luna at max reasoning for implementation. Keep Standard speed for every stage; custom agents inherit the root session speed. Use for delegated implementation, multi-task builds, feature work, bug fixes, refactors, five-part implementation specs, verification of subagent work, commitment-boundary advice, or any deliverable that must receive a final independent-context review before completion."
 ---
 
 # Sol Advisor Orchestration
@@ -25,7 +25,10 @@ At the start of every skill run, before planning or delegation, ask the user:
 > current session: low, medium, high, xhigh, max, or ultra when available.
 
 Do not assume a default or begin delegated work until the user answers. Run the primary
-Codex session on GPT-6.2 Sol. Verify its current model and effort when the runtime
+Codex session on GPT-6.2 Sol at Standard speed. At skill startup, ensure Standard is
+selected in the composer; if another speed is selected or the speed cannot be confirmed,
+ask the user to select Standard and wait before planning. Keep Standard selected for
+Luna and reviewer threads as well. Verify the current model and effort when the runtime
 exposes them. If the active effort differs from the user's selected orchestrator level,
 ask the user to select that level in the composer and wait before continuing; the skill
 cannot change the primary session's model or effort itself. Pass the selected reviewer
@@ -105,13 +108,13 @@ The custom-agent files pin their models, and the Luna file pins max reasoning. D
 add a per-spawn model override. Pass the user's selected reasoning effort when spawning
 the Sol reviewer; omit the reasoning field for Luna so its max pin applies.
 
-## Require Fast mode for implementation
+## Keep Standard speed throughout
 
-Before spawning Luna, require the parent Codex session to use Fast speed. Codex custom
-agents inherit the root session's service tier, and a custom-agent TOML cannot set a
-separate tier. If Fast is not active or cannot be observed, ask the user to select Fast
-in the composer and wait for confirmation before spawning Luna. This also puts the
-orchestrator and reviewer on Fast because they share the parent session's speed.
+Keep the parent Codex session at Standard speed for orchestration, Luna implementation,
+and Sol review. Codex custom agents inherit the root session's service tier, and their
+TOML files cannot set an independent tier. If another speed is selected or the active
+speed cannot be confirmed, ask the user to select Standard and wait before continuing.
+Do not request a speed change for Luna.
 
 ## Keep architect work in the primary session
 

@@ -1,6 +1,9 @@
 # Native Codex role contracts
 
-Use these contracts with Sol Advisor's namespaced, role-pinned native custom agents.
+Use Standard speed for the parent session throughout the workflow. If another speed is
+selected or the speed cannot be confirmed, ask the user to select Standard before
+starting orchestration. Use these contracts with Sol Advisor's namespaced, role-pinned
+native custom agents.
 They are not nested Codex CLI wrappers and they do not change global default-subagent
 routing. Load only the contract needed for the next spawn. Adapt every placeholder;
 do not remove a required field.
@@ -90,10 +93,11 @@ fork_turns: none
 ~~~
 
 The installed sol_advisor_luna_implementer file pins GPT-6 Luna at max reasoning.
-Use Fast mode inherited from the parent session; Codex custom-agent files cannot set a
-separate service tier. Do not attach a per-spawn model or reasoning field. Require
-public-details-first runtime observation of that role and pin, using the local inspector
-only if public details omit model or effort, before accepting its report.
+Keep the parent session at Standard before spawning Luna. Codex custom-agent files
+inherit the root session's service tier and cannot set a separate tier. Do not attach a
+per-spawn model or reasoning field. Require public-details-first runtime observation of
+that role and pin, using the local inspector only if public details omit model or effort,
+before accepting its report.
 
 Use this one role for routine and context-heavy implementation alike. The prompt must
 encode the settled architecture and the five-part contract below. Prompt:
